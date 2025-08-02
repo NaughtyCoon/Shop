@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
 
         Analyzer analyzer = new Analyzer();
-        System.out.println(analyzer.getThreeBestSellers());
+        System.out.println(analyzer.getStoresWithoutFruits());
 
     }
 }

@@ -97,4 +97,41 @@ public class Analyzer {
 
     }
 
+    public List<Store> getStoresWithoutFruits() {
+
+        List<Product> notFruitCategoryProducts = storeRepo.getProducts().stream()
+                .filter(product -> !Objects.equals(product.getCategory(), "Фрукты"))
+                .toList();
+
+        List<Warehouse> noFruitWarehouses = storeRepo.getWarehouses().stream()
+                .filter(warehouse -> notFruitCategoryProducts.stream()
+                                .anyMatch(product -> product.getId() == warehouse.getProductId()))
+                .toList();
+
+        return
+                storeRepo.getStores().stream()
+                        .filter(store -> noFruitWarehouses.stream()
+                                .anyMatch(warehouse -> warehouse.getStoreId() == store.getId()))
+                        .toList();
+
+    }
+
+    public Map<Store, Double> getMayShopsRevenue() {
+
+        Map<Integer, Integer> maySalesRevenues = storeRepo.getSales().stream()
+                .filter(sale -> sale.getDate().getMonthValue() == 5)
+                .collect(Collectors.toMap(
+                        Sale::getStoreId,
+                        sale -> storeRepo.getProducts().stream()
+                                .findFirst(product -> product.getId() == sale.getProductId())
+                                .toList()
+
+                        ,
+                        Integer::sum
+                ));
+
+
+
+    }
+
 }

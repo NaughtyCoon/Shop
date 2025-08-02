@@ -1,5 +1,6 @@
 package org.example;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,10 +30,10 @@ public class StoreRepo {
     ));
 
     private List<Sale> sales = new ArrayList<>(Arrays.asList(
-            new Sale(1, 1, 1, 5, "2024-05-01"),  // В Пятерочке продано 5 помидоров
-            new Sale(2, 1, 2, 3, "2024-05-01"),  // 3 огурца
-            new Sale(3, 2, 1, 2, "2024-05-02"),  // В Магните 2 помидора
-            new Sale(4, 3, 3, 10, "2024-05-03")  // В Перекрестке 10 яблок
+            new Sale(1, 1, 1, 5, LocalDate.parse("2024-05-01")),  // В Пятерочке продано 5 помидоров
+            new Sale(2, 1, 2, 3, LocalDate.parse("2024-05-01")),  // 3 огурца
+            new Sale(3, 2, 1, 2, LocalDate.parse("2024-05-02")),  // В Магните 2 помидора
+            new Sale(4, 3, 3, 10, LocalDate.parse("2024-05-03"))  // В Перекрестке 10 яблок
     ));
 
     public List<Store> getStores() {

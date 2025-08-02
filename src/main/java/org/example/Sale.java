@@ -1,6 +1,6 @@
 package org.example;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Sale {
 
@@ -8,9 +8,9 @@ public class Sale {
     private int storeId;    // ID проданного товара
     private int productId;  // ID проданного товара
     private int quantity;   // количество проданного товара
-    private String date;      // Дата продажи
+    private LocalDate date;      // Дата продажи
 
-    public Sale(int id, int storeId, int productId, int quantity, String date) {
+    public Sale(int id, int storeId, int productId, int quantity, LocalDate date) {
 
         this.id = id;
         this.storeId = storeId;
@@ -52,12 +52,12 @@ public class Sale {
         this.quantity = quantity;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
     public void setDate(String date) {
-        this.date = date;
+        this.date = LocalDate.parse(date);
     }
 
 }

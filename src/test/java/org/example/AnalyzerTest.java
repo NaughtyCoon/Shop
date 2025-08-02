@@ -2,18 +2,15 @@ package org.example;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AnalyzerTest {
-
-//    private final StoreRepo storeRepo = new StoreRepo();
-//    private Analyzer analyzer = new Analyzer(storeRepo);
-
-
 
     @Test
     void findOpenStoreOnBasseina_whenEmptyList_thenReturnEmptyList() {
@@ -217,7 +214,7 @@ public class AnalyzerTest {
         Analyzer analyzer = new Analyzer();
 
         analyzer.getStoreRepo().getProducts().add(new Product(5, null, "Овощи", 120.0));
-        analyzer.getStoreRepo().getSales().add(new Sale(5, 1, 5, 100, "2024-05-01"));
+        analyzer.getStoreRepo().getSales().add(new Sale(5, 1, 5, 100, LocalDate.parse("2024-05-01")));
 
         assertTrue(analyzer.getThreeBestSellers().containsKey("Неизвестный товар"));
 
@@ -229,7 +226,7 @@ public class AnalyzerTest {
         Analyzer analyzer = new Analyzer();
 
         analyzer.getStoreRepo().getProducts().add(new Product(5, null, "Овощи", 120.0));
-        analyzer.getStoreRepo().getSales().add(new Sale(5, 1, 5, 100, "2024-05-01"));
+        analyzer.getStoreRepo().getSales().add(new Sale(5, 1, 5, 100, LocalDate.parse("2024-05-01")));
         List<String> keys = new ArrayList<>(analyzer.getThreeBestSellers().keySet());
 
         assertEquals(3, keys.size());
@@ -239,8 +236,60 @@ public class AnalyzerTest {
 
     }
 
+    @Test
+    void getStoresWithoutFruits_whenNoStoreHasFruits_thenReturnCompleteOriginalList() {
 
-//            new Sale(3, 2, 1, 2, "2024-05-02"),  // В Магните 2 помидора
-//            new Sale(4, 3, 3, 10, "2024-05-03")  // В Перекрестке 10 яблок
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setWarehouses(new ArrayList<>(Arrays.asList(
+                new Warehouse(1, 1, 50),
+                new Warehouse(1, 2, 30),
+                new Warehouse(2, 1, 20),
+                new Warehouse(3, 2, 100),   // Пусть вместо яблок будут огурцы
+                new Warehouse(4, 4, 40)
+        )));
+
+        assertEquals(4, analyzer.getStoresWithoutFruits().size());
+
+    }
+
+    @Test
+    void getStoresWithoutFruits_whenAllStoresContainFruits_thenReturnEmptyList() {
+
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setWarehouses(new ArrayList<>(Arrays.asList(
+                new Warehouse(1, 3, 50),
+                new Warehouse(1, 3, 30),
+                new Warehouse(2, 3, 20),
+                new Warehouse(3, 3, 100),   // Пусть вместо яблок будут огурцы
+                new Warehouse(4, 3, 40)
+        )));
+
+        assertTrue(analyzer.getStoresWithoutFruits().isEmpty());
+
+    }
+
+    @Test
+    void getStoresWithoutFruits_whenNoWarehouseExists_thenReturnEmptyList() {
+
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setWarehouses(new ArrayList<>(List.of()));
+
+        assertTrue(analyzer.getStoresWithoutFruits().isEmpty());
+
+    }
+
+    @Test
+    void getStoresWithoutFruits_whenNoStoreExists_thenReturnEmptyList() {
+
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setStores(new ArrayList<>(List.of()));
+
+        assertTrue(analyzer.getStoresWithoutFruits().isEmpty());
+
+    }
 
 }
