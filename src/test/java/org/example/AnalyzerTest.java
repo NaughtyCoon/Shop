@@ -3,9 +3,8 @@ package org.example;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -291,5 +290,146 @@ public class AnalyzerTest {
         assertTrue(analyzer.getStoresWithoutFruits().isEmpty());
 
     }
+
+    @Test
+    void getMayShopsIncome_whenListOfSalesIsEmpty_thenReturnMapOfStoresWithZeroIncome() {
+
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setSales(List.of());
+
+        assertTrue(analyzer.getMayShopsIncome().entrySet().stream()
+                .allMatch(entry -> entry.getValue() == 0.0));
+
+    }
+
+    @Test
+    void getMayShopsIncome_whenMaySalesDoNotExist_thenReturnMapOfStoresWithZeroIncome() {
+
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setSales(List.of(
+                new Sale(1, 1, 1, 5, LocalDate.parse("2024-07-01")),  // В Пятерочке продано 5 помидоров
+                new Sale(2, 1, 2, 3, LocalDate.parse("2024-07-01")),  // 3 огурца
+                new Sale(3, 2, 1, 2, LocalDate.parse("2024-07-02")),  // В Магните 2 помидора
+                new Sale(4, 3, 3, 10, LocalDate.parse("2024-07-03"))  // В Перекрестке 10 яблок
+        ));
+
+        assertTrue(analyzer.getMayShopsIncome().entrySet().stream()
+                .allMatch(entry -> entry.getValue() == 0.0));
+
+    }
+
+    @Test
+    void getMayShopsIncome_whenMaySalesExist_thenReturnMapOfStoresWithMayIncome() {
+
+        Analyzer analyzer = new Analyzer();
+
+        List<Store> stores = analyzer.getStoreRepo().getStores();
+
+        Map<Store, Double> precalculatedIncomes = new HashMap<>();
+
+            precalculatedIncomes.put(stores.get(0), 870.0);
+            precalculatedIncomes.put(stores.get(1), 240.0);
+            precalculatedIncomes.put(stores.get(2), 800.0);
+            precalculatedIncomes.put(stores.get(3), 0.0);
+
+        assertEquals(precalculatedIncomes.size(), stores.size());
+
+        for (Store store : stores) {
+            assertEquals(analyzer.getMayShopsIncome().get(store), precalculatedIncomes.get(store));
+        }
+
+    }
+
+    @Test
+    void getNeverSoldProducts_whenSalesListIsEmpty_thenReturnOriginalProductList() {
+
+        Analyzer analyzer = new Analyzer();
+        analyzer.getStoreRepo().setSales(List.of());
+
+        List<Product> products = analyzer.getStoreRepo().getProducts();
+        List<Product> neverSoldProducts = analyzer.getNeverSoldProducts();
+
+        assertEquals(4, neverSoldProducts.size());
+
+        for(Product product:products) {
+            assertTrue(neverSoldProducts.stream()
+                    .anyMatch(n -> n.getId() == product.getId()));
+        }
+
+    }
+
+    @Test
+    void getNeverSoldProducts_whenSalesListIsNotEmpty_thenReturnListOfNeverSoldProducts() {
+
+        Analyzer analyzer = new Analyzer();
+
+        List<Product> neverSoldProducts = analyzer.getNeverSoldProducts();
+
+        assertEquals(1, neverSoldProducts.size());
+        assertEquals(4,neverSoldProducts.get(0).getId());
+
+    }
+
+    @Test
+    void getNeverSoldProducts_whenSalesListHasNoMatchInProducts_thenNameThatProductUnknownAndShowId() {
+
+        Analyzer analyzer = new Analyzer();
+        // Избавимся от молока:
+        analyzer.getStoreRepo().getSales().add(new Sale(5, 3, 4, 2, LocalDate.parse("2024-05-03")));
+        // ...и добавим загадочный продукт №5:
+        analyzer.getStoreRepo().getWarehouses().add(new Warehouse(4, 5, 40));
+
+        List<Product> neverSoldProducts = analyzer.getNeverSoldProducts();
+
+        assertEquals(1, neverSoldProducts.size());
+        assertEquals("Неизвестный продукт с id = 5", neverSoldProducts.get(0).getName());
+
+    }
+
+    @Test
+    void getAvgPriceByCategories_whenProductListIsEmpty_thenReturnEmptyMap() {
+
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setProducts(List.of());
+
+        assertTrue(analyzer.getAvgPriceByCategories().isEmpty());
+
+    }
+
+    @Test
+    void getAvgPriceByCategories_whenProductListIsNotEmpty_thenReturnMapOfAveragePrices() {
+
+        Analyzer analyzer = new Analyzer();
+
+        Map<String, Double> averages = analyzer.getAvgPriceByCategories();
+
+        assertEquals(3, averages.size());
+
+        assertEquals(105.0, averages.get("Овощи"));
+        assertEquals(80.0, averages.get("Фрукты"));
+        assertEquals(70.0, averages.get("Молочные продукты"));
+
+    }
+
+    @Test
+    void getAvgPriceByCategories_whenAvgPriceHasMoreThanTwoSignsAfterPoint_thenReturnMapOfRoundedAveragePrices() {
+
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setProducts(List.of(
+                new Product(1, "Помидоры", "Овощи", 120.0),
+                new Product(2, "Огурцы", "Овощи", 90.0),
+                new Product(3, "Картофель", "Овощи", 80.0)));
+
+        Map<String, Double> averages = analyzer.getAvgPriceByCategories();
+
+        assertEquals(96.67, averages.get("Овощи"));
+
+    }
+
+
 
 }

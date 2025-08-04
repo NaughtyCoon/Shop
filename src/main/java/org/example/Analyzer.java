@@ -116,21 +116,53 @@ public class Analyzer {
 
     }
 
-    public Map<Store, Double> getMayShopsRevenue() {
+    public Map<Store, Double> getMayShopsIncome() {
 
-        Map<Integer, Integer> maySalesRevenues = storeRepo.getSales().stream()
-                .filter(sale -> sale.getDate().getMonthValue() == 5)
+        return
+                storeRepo.getStores().stream()
                 .collect(Collectors.toMap(
-                        Sale::getStoreId,
-                        sale -> storeRepo.getProducts().stream()
-                                .findFirst(product -> product.getId() == sale.getProductId())
-                                .toList()
-
-                        ,
-                        Integer::sum
+                        store -> store,
+                        store -> storeRepo.getSales().stream()
+                                .filter(sale -> store.getId() == sale.getStoreId() && sale.getDate().getMonthValue() == 5)
+                                .mapToDouble(sale -> sale.getQuantity() * storeRepo.getProducts().stream()
+                                        .filter(product -> product.getId() == sale.getProductId())
+                                        .findFirst()
+                                        .map(Product::getPrice)
+                                        .orElse(0.0)
+                                )
+                                .sum()
                 ));
 
+    }
 
+    public List<Product> getNeverSoldProducts() {
+
+        return
+                getStoreRepo().getWarehouses().stream()
+                        .map(Warehouse::getProductId)
+                        .filter(productId -> getStoreRepo().getSales().stream()
+                                .noneMatch(sale -> sale.getProductId() == productId))
+                        .distinct()
+                        .sorted()
+                        .toList().stream()
+                        .map(prodId -> getStoreRepo().getProducts().stream()
+                                .filter(e -> e.getId() == prodId)
+                                .findFirst()
+                                .orElse(new Product(prodId, "Неизвестный продукт с id = " + prodId, "Неизвестно", 0.0)))
+                        .toList();
+
+    }
+
+    public Map<String, Double> getAvgPriceByCategories() {
+
+        return
+                getStoreRepo().getProducts().stream()
+                        .collect(Collectors.groupingBy(
+                                Product::getCategory,
+                                Collectors.collectingAndThen(
+                                        Collectors.averagingDouble(Product::getPrice),
+                                        avg -> Math.round(avg * 100) / 100.0
+                                )));
 
     }
 
