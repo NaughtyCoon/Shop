@@ -1,5 +1,7 @@
 package org.example;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -105,7 +107,7 @@ public class Analyzer {
 
         List<Warehouse> noFruitWarehouses = storeRepo.getWarehouses().stream()
                 .filter(warehouse -> notFruitCategoryProducts.stream()
-                                .anyMatch(product -> product.getId() == warehouse.getProductId()))
+                        .anyMatch(product -> product.getId() == warehouse.getProductId()))
                 .toList();
 
         return
@@ -120,18 +122,18 @@ public class Analyzer {
 
         return
                 storeRepo.getStores().stream()
-                .collect(Collectors.toMap(
-                        store -> store,
-                        store -> storeRepo.getSales().stream()
-                                .filter(sale -> store.getId() == sale.getStoreId() && sale.getDate().getMonthValue() == 5)
-                                .mapToDouble(sale -> sale.getQuantity() * storeRepo.getProducts().stream()
-                                        .filter(product -> product.getId() == sale.getProductId())
-                                        .findFirst()
-                                        .map(Product::getPrice)
-                                        .orElse(0.0)
-                                )
-                                .sum()
-                ));
+                        .collect(Collectors.toMap(
+                                store -> store,
+                                store -> storeRepo.getSales().stream()
+                                        .filter(sale -> store.getId() == sale.getStoreId() && sale.getDate().getMonthValue() == 5)
+                                        .mapToDouble(sale -> sale.getQuantity() * storeRepo.getProducts().stream()
+                                                .filter(product -> product.getId() == sale.getProductId())
+                                                .findFirst()
+                                                .map(Product::getPrice)
+                                                .orElse(0.0)
+                                        )
+                                        .sum()
+                        ));
 
     }
 
@@ -165,5 +167,7 @@ public class Analyzer {
                                 )));
 
     }
+
+
 
 }
