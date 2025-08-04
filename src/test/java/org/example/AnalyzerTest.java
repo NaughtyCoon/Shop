@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -329,10 +328,10 @@ public class AnalyzerTest {
 
         Map<Store, Double> precalculatedIncomes = new HashMap<>();
 
-            precalculatedIncomes.put(stores.get(0), 870.0);
-            precalculatedIncomes.put(stores.get(1), 240.0);
-            precalculatedIncomes.put(stores.get(2), 800.0);
-            precalculatedIncomes.put(stores.get(3), 0.0);
+        precalculatedIncomes.put(stores.get(0), 870.0);
+        precalculatedIncomes.put(stores.get(1), 240.0);
+        precalculatedIncomes.put(stores.get(2), 800.0);
+        precalculatedIncomes.put(stores.get(3), 0.0);
 
         assertEquals(precalculatedIncomes.size(), stores.size());
 
@@ -353,7 +352,7 @@ public class AnalyzerTest {
 
         assertEquals(4, neverSoldProducts.size());
 
-        for(Product product:products) {
+        for (Product product : products) {
             assertTrue(neverSoldProducts.stream()
                     .anyMatch(n -> n.getId() == product.getId()));
         }
@@ -368,7 +367,7 @@ public class AnalyzerTest {
         List<Product> neverSoldProducts = analyzer.getNeverSoldProducts();
 
         assertEquals(1, neverSoldProducts.size());
-        assertEquals(4,neverSoldProducts.get(0).getId());
+        assertEquals(4, neverSoldProducts.get(0).getId());
 
     }
 
@@ -430,6 +429,49 @@ public class AnalyzerTest {
 
     }
 
+    @Test
+    void getTwoDaysNoSalesStores_whenListOfStoresIsEmpty_thenReturnEmptyList() {
 
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setStores(List.of());
+
+        assertTrue(analyzer.getTwoDaysNoSalesStores().isEmpty());
+
+    }
+
+    @Test
+    void getTwoDaysNoSalesStores_whenListOfSalesIsEmpty_thenReturnEntireOriginalStoreList() {
+
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setSales(List.of());
+
+        assertEquals(4, analyzer.getTwoDaysNoSalesStores().size());
+
+    }
+
+    @Test
+    void getTwoDaysNoSalesStores_whenListsOfSalesAndStoresExist_thenReturnStoreListOfNoSalesInTwoDays() {
+
+        Analyzer analyzer = new Analyzer();
+
+        analyzer.getStoreRepo().setSales(List.of(
+                new Sale(1, 1, 1, 5, LocalDate.parse("2025-08-04")),
+                new Sale(2, 1, 2, 3, LocalDate.parse("2025-08-04")),
+                new Sale(3, 2, 1, 2, LocalDate.parse("2025-08-04")),
+                new Sale(4, 3, 3, 10, LocalDate.parse("2024-05-03"))
+        ));
+
+        List<Store> noSaleStore = analyzer.getTwoDaysNoSalesStores();
+
+        assertEquals(2, noSaleStore.size());
+
+        assertTrue((Objects.equals(noSaleStore.get(0).getName(), "Перекресток")) ||
+                (Objects.equals(noSaleStore.get(0).getName(), "Дикси")));
+        assertTrue((Objects.equals(noSaleStore.get(1).getName(), "Перекресток")) ||
+                (Objects.equals(noSaleStore.get(1).getName(), "Дикси")));
+
+    }
 
 }

@@ -9,14 +9,10 @@ import java.util.Map.Entry;
 
 public class Analyzer {
 
-    private StoreRepo storeRepo = new StoreRepo();
+    private final StoreRepo storeRepo = new StoreRepo();
 
     public StoreRepo getStoreRepo() {
         return storeRepo;
-    }
-
-    public void setStoreRepo(StoreRepo storeRepo) {
-        this.storeRepo = storeRepo;
     }
 
     public List<Store> findOpenStoreOnBasseina() {
@@ -168,6 +164,19 @@ public class Analyzer {
 
     }
 
+    public List<Store> getTwoDaysNoSalesStores() {
 
+        LocalDate nowDate = LocalDate.now();
+
+        return
+                storeRepo.getStores().stream()
+                        .filter(store -> (storeRepo.getSales().stream()
+                                .anyMatch(sale -> ChronoUnit.DAYS.between(sale.getDate(), nowDate) > 2 &&
+                                        sale.getStoreId() == store.getId())) ||
+                                storeRepo.getSales().stream()
+                                        .noneMatch(noSale -> noSale.getStoreId() == store.getId()))
+                        .toList();
+
+    }
 
 }
